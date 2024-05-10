@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="VcsDirectoryMappings">
+    <mapping directory="$PROJECT_DIR$/dr_cvar_module_application/como_tracks" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/dr_cvar_module_application/dr_cvar_safety_filtering_ros" vcs="Git" />
+  </component>
+</project>

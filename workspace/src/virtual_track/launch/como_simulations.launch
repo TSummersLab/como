@@ -1,0 +1,4 @@
+<launch>
+	<node pkg="virtual_track" type="ego_overtake.py" name="ego_overtake_planner" output="screen">
+	</node>
+</launch>

@@ -1,0 +1,4 @@
+<launch>
+	<node pkg="virtual_track" type="python_version_test.py" name="python_version" output="screen">
+	</node>
+</launch>

@@ -1,0 +1,4 @@
+<launch>
+	<node pkg="virtual_track" type="vehicle_controller.py" name="vehicle_controller" output="screen">
+	</node>
+</launch>
