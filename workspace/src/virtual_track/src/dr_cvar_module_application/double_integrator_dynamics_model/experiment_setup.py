@@ -76,7 +76,7 @@ def como_exp_setup(exp_type, metric, filter_slack, track):
         sim_steps = int(np.ceil(total_time / dt))
 
         # Collect sensor and external data for the specified ego vehicle
-        ego_veh_id = "COMO4" #TODO: Modify to be selected via rosparam
+        ego_veh_id = "COMO2" #TODO: Modify to be selected via rosparam
         ego_veh_sub = VehicleSub(ego_veh_id, pose=[2.0, -1.5, 0], orientation=[0, 0, -np.pi/2], velocity=1.0)
 
         # Ego vehicle setup
@@ -96,7 +96,7 @@ def como_exp_setup(exp_type, metric, filter_slack, track):
         ego_goal_state = np.array([wp[0], wp[1], 0, 0])
 
         # Define obstacle(s) data for the application
-        obst_veh_ids = ["COMO2"]
+        obst_veh_ids = ["COMO4"]
         obst_init_positions = []
         obst_ref_vels = []
         obst_radii = []

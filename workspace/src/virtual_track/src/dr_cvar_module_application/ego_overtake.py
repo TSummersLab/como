@@ -25,11 +25,11 @@ def main():
     file = os.path.join(package_path, 'src', 'dr_cvar_module_application', 'como_tracks', 'tracks', 'otsl_track.csv')
 
     # TODO: Specify Ego vehicle
-    ego_id = "COMO4" #TODO: Modify to be based on rosparam?
+    ego_id = "COMO2" #TODO: Modify to be based on rosparam?
     ego_vehicle = VehicleSub(ego_id)
 
     # TODO: Repeat for each obstacle
-    obstacle_ids = ["COMO2"]
+    obstacle_ids = ["COMO4"]
     obstacle_vehicles = {}
     for obstacle_id in obstacle_ids:
         obstacle_vehicles[obstacle_id] = VehicleSub(obstacle_id)
