@@ -10,3 +10,9 @@
 [submodule "workspace/src/centralized_server/src/virtual_track/como_tracks"]
 	path = workspace/src/centralized_server/src/virtual_track/como_tracks
 	url = https://github.com/The-SS/como_tracks
+[submodule "workspace/src/virtual_track/src/dr_cvar_module_application/como_tracks"]
+	path = workspace/src/virtual_track/src/dr_cvar_module_application/como_tracks
+	url = https://github.com/The-SS/como_tracks.git
+[submodule "workspace/src/virtual_track/src/dr_cvar_module_application/dr_cvar_safety_filtering_ros"]
+	path = workspace/src/virtual_track/src/dr_cvar_module_application/dr_cvar_safety_filtering_ros
+	url = https://github.com/Balstun/dr_cvar_safety_filtering_ros.git
