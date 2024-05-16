@@ -1,4 +1,7 @@
 <launch>
+	<include file="$(find vrpn_client_ros)/launch/sample.launch">
+		<arg name="server" value="192.168.0.131" />
+	</include>
 	<node pkg="virtual_track" type="ego_overtake.py" name="ego_overtake_planner" output="screen">
 	</node>
 </launch>
