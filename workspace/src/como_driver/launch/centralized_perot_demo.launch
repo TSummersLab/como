@@ -7,7 +7,7 @@
 
 <launch>
 
-    <group ns="como2">
+    <group ns="como1">
 
     <!-- SYSTEM MODEL -->
     <!-- vehicle parameters -->
