@@ -3,20 +3,25 @@
 import asyncio
 from websockets.server import serve
 
+# Dictionary to keep track of connected clients
 clients = {}
 
+# Register a new client
 async def register(client):
+	# If client is already in dictionary, send client already registered"
     if client["id"] in clients:
         await clients[client["id"]]["websocket"].send(f"Client {client['id']} already registered")
-    else:
+    else: # else register new client
         clients[client["id"]] = client
         print(f"Client {client['id']} registered")
 
+# Remove client from clients dictionary
 async def unregister(client_id):
     if client_id in clients:
         clients.pop(client_id)
         print(f"Client {client_id} unregistered")
 
+# Handle incoming messages from clients
 async def read(websocket, path):
     client_id = None
     try:
@@ -42,7 +47,7 @@ async def read(websocket, path):
                 command = message[1]
                 args = message[2] if len(message) > 2 else ""
 
-                # send to it to the client
+                # Send commands and arguments to specific clients based on client_id/namespace
                 if client_id in clients:
                     await clients[client_id]["websocket"].send(f"{command} {args}")
 
@@ -53,7 +58,9 @@ async def read(websocket, path):
         if client_id and client_id in clients:
             await unregister(client_id)
 
+# Start the server
 async def main():
+    # IP address, check ip address by running ifconfig and update below accordingly.
     async with serve(read, "192.168.1.104", 8765, ping_interval=None):
         await asyncio.Future()
 

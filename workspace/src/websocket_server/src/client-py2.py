@@ -5,32 +5,38 @@ import rospy
 import subprocess
 import os
 import sys
-import shlex
 import time
 from websocket import create_connection
 
+# Generate or retrieve unique roslaunch identifier
 uuid = roslaunch.rlutil.get_or_generate_uuid(None, False)
 roslaunch.configure_logging(uuid)
 
+# Retrieve unique namespace of the client
 NAMESPACE = rospy.get_namespace()
-NAMESPACE = NAMESPACE[1:-1] # removes slash at the end
+NAMESPACE = NAMESPACE[1:-1] # removes slash at the end and beginning
 
+# Class for starting and stopping ros program
 class ROSProgram:
     def __init__(self, filename):
         self.filename = filename
         self.launch = None
 
+    # Function to start a ros program using roslaunch api
     def start(self):
-        filepath = os.path.abspath('/home/conlab-minii/como/workspace/src/como_driver/launch/' + self.filename + '.launch')
+    	# Absolute path used to run .launch files. Update path as needed
+        filepath = os.path.abspath('~/como/workspace/src/como_driver/launch/' + self.filename + '.launch')
         self.launch = roslaunch.parent.ROSLaunchParent(uuid, [filepath], is_core=True)
         self.launch.start()
         print("ROS Program Started")
 
+    # Function to stop ros program if it is running
     def stop(self):
         if self.launch is not None:
             self.launch.shutdown()
         print("ROS Program Stopped")
 
+# Function to send client identification to server
 def send_identification(websocket):
     client_id = NAMESPACE
     client_type = "COMO"
@@ -73,6 +79,7 @@ def prog_cmd(message):
     except Exception as e:
         print(f"Failed to execute command: {e}")
 
+# Function for handling messages received from the server
 def handle_messages(websocket):
     global program
 
@@ -83,26 +90,26 @@ def handle_messages(websocket):
         command = message.split()[0]
 
         if command == 'init':
-            program = ROSProgram(message.split()[1])
+            program = ROSProgram(message.split()[1])	# Initializes ros program
         elif command == 'start':
             program.start()
         elif command == 'stop':
             program.stop()
         elif command == 'disconnect':
-        	sys.exit()
+        	sys.exit()	# Disconnects client from server
         elif command == 'prog_cmd':
-        	prog_cmd(message.split(maxsplit=1)[1])
+        	prog_cmd(message.split(maxsplit=1)[1]) # Handles custom messages
         else:
-            # Handle other commands or unexpected messages
+            # Handle unexpected messages
             print("Unhandled message: {}".format(message))
 
 def run():
-    uri = "ws://192.168.1.104:8765"
+    uri = "ws://192.168.1.104:8765" # IP address, check ip address by running ifconfig and update accordingly.
 
-    websocket = create_connection(uri)
+    websocket = create_connection(uri) # websocket cocnnection to server
     try:
         send_identification(websocket)
-        handle_messages(websocket)
+        handle_messages(websocket) # Handle incoming messages from server
     finally:
         websocket.close()
 
