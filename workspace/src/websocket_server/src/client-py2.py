@@ -25,7 +25,7 @@ class ROSProgram:
     # Function to start a ros program using roslaunch api
     def start(self):
     	# Absolute path used to run .launch files. Update path as needed
-        filepath = os.path.abspath('~/como/workspace/src/como_driver/launch/' + self.filename + '.launch')
+        filepath = os.path.abspath('/home/nano3/como/workspace/src/como_driver/launch/' + self.filename + '.launch')
         self.launch = roslaunch.parent.ROSLaunchParent(uuid, [filepath], is_core=True)
         self.launch.start()
         print("ROS Program Started")
@@ -52,32 +52,33 @@ def prog_cmd(message):
 	try:
 		subprocess.Popen(terminal_command)
 	except Exception as e:
-		print(f"Failed to execute command: {e}")'''
+		print("Failed to execute command: {}".format(msg))'''
 		
 
 def prog_cmd(message):
-    # Define the terminal command to open a new terminal and keep it open with exec bash
-    terminal_command = ['gnome-terminal', '--', 'bash', '-c', 'exec bash']
+	msg = " ".join(message.split()[1:])
+	# Define the terminal command to open a new terminal and keep it open with exec bash
+	terminal_command = ['gnome-terminal', '--', 'bash', '-c', 'exec bash']
 
-    try:
-        # Open a new terminal
-        proc = subprocess.Popen(terminal_command)
+	try:
+		# Open a new terminal
+		proc = subprocess.Popen(terminal_command)
 
-        # Give the terminal some time to open
-        time.sleep(1.5)
+		# Give the terminal some time to open
+		time.sleep(1.5)
 
-        # Find the window ID of the most recently opened terminal
-        window_id = subprocess.check_output(['xdotool', 'search', '--sync', '--onlyvisible', '--class', 'gnome-terminal']).split()[-1].decode('utf-8')
+		# Find the window ID of the most recently opened terminal
+		window_id = subprocess.check_output(['xdotool', 'search', '--sync', '--onlyvisible', '--class', 'gnome-terminal']).split()[-1].decode('utf-8')
 
-        # Focus on the new terminal window
-        subprocess.run(['xdotool', 'windowfocus', window_id])
+		# Focus on the new terminal window
+		subprocess.call(['xdotool', 'windowfocus', window_id])
 
-        # Type the command in the new terminal
-        subprocess.run(['xdotool', 'type', message])
-        subprocess.run(['xdotool', 'key', 'Return'])
+		# Type the command in the new terminal
+		subprocess.call(['xdotool', 'type', msg])
+		subprocess.call(['xdotool', 'key', 'Return'])
 
-    except Exception as e:
-        print(f"Failed to execute command: {e}")
+	except Exception as e:
+		print("Failed to execute command: {}".format(e))
 
 # Function for handling messages received from the server
 def handle_messages(websocket):
@@ -98,13 +99,13 @@ def handle_messages(websocket):
         elif command == 'disconnect':
         	sys.exit()	# Disconnects client from server
         elif command == 'prog_cmd':
-        	prog_cmd(message.split(maxsplit=1)[1]) # Handles custom messages
+        	prog_cmd(message) # Handles custom messages
         else:
             # Handle unexpected messages
             print("Unhandled message: {}".format(message))
 
 def run():
-    uri = "ws://192.168.1.104:8765" # IP address, check ip address by running ifconfig and update accordingly.
+    uri = "ws://192.168.0.181:8765" # IP address, check ip address by running ifconfig and update accordingly.
 
     websocket = create_connection(uri) # websocket cocnnection to server
     try:
