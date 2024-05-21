@@ -57,8 +57,8 @@ def main():
 		ecu_transfer = ecuSubscribe.get_ecu()
 
                 sent_state = choiceSub.get_sent_state()
-                sent_namespace = choiceSub.get_sent_namespace()
-
+                sent_namespace = "/" + choiceSub.get_sent_namespace()
+		#print(NAMESPACE, sent_namespace)
                 ecuPublish.set_ecu(ecu_transfer.motor, ecu_transfer.servo)
                 if NAMESPACE == sent_namespace:
                     if sent_state == "stop":
