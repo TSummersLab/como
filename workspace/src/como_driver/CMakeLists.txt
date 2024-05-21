@@ -54,6 +54,7 @@ find_package(catkin REQUIRED COMPONENTS
  add_service_files(
    FILES
    Choice.srv
+   StartStop.srv
  )
 
 ## Generate actions in the 'action' folder
