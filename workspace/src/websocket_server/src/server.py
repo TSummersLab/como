@@ -48,6 +48,10 @@ async def read(websocket, path):
                 args = message[2] if len(message) > 2 else ""
 
                 # Send commands and arguments to specific clients based on client_id/namespace
+                if client_id == "all":
+                	for cid, client in clients.items():
+                		if client["type"] != "cli":
+                			await client["websocket"].send(f"{command} {args}")
                 if client_id in clients:
                     await clients[client_id]["websocket"].send(f"{command} {args}")
 
