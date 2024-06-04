@@ -44,17 +44,32 @@ def send_identification(websocket):
     #print("namespace: " + NAMESPACE)
     print("Sent Client ID: {}".format(client_id))
 
-''' 
+# Directly calls ros service
+def call_rosservice(message):
+	msg = message.split()
+	srv_name = msg[2]
+	srv_args = " ".join(msg[3:])
+	try:
+		srv_args = srv_args[1:-1]
+		srv_command = ['rosservice', 'call', srv_name, srv_args]
+		subprocess.call(srv_command)
+	except subprocess.CalledProcessError as e:
+		print("Service call failed: {}".format(e.output))
+
+
+# Opens a new terminal and runs any terminal command
 def prog_cmd(message):
-	#method 1 without using xdotool
-	terminal_command = ['gnome-terminal', '--', 'bash', '-c', f"{message}; exec bash"]
+	msg = " ".join(message.split()[1:])
+	terminal_command = ['gnome-terminal', '--', 'bash', '-c', "{}; exec bash".format(msg)]
 	
 	try:
 		subprocess.Popen(terminal_command)
 	except Exception as e:
-		print("Failed to execute command: {}".format(msg))'''
-		
+		print("Failed to execute command: {}".format(msg))
 
+
+'''
+# Opens a new terminal, types in a terminal command using xdotool and executes it
 def prog_cmd(message):
 	msg = " ".join(message.split()[1:])
 	# Define the terminal command to open a new terminal and keep it open with exec bash
@@ -78,7 +93,7 @@ def prog_cmd(message):
 		subprocess.call(['xdotool', 'key', 'Return'])
 
 	except Exception as e:
-		print("Failed to execute command: {}".format(e))
+		print("Failed to execute command: {}".format(e))'''
 
 # Function for handling messages received from the server
 def handle_messages(websocket):
@@ -99,7 +114,9 @@ def handle_messages(websocket):
         elif command == 'disconnect':
         	sys.exit()	# Disconnects client from server
         elif command == 'prog_cmd':
-        	prog_cmd(message) # Handles custom messages
+        	prog_cmd(message)	# Handles custom messages
+	elif command == 'rosservice':
+		call_rosservice(message)	# Handles calls to ros services
         else:
             # Handle unexpected messages
             print("Unhandled message: {}".format(message))
