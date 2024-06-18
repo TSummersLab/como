@@ -65,7 +65,7 @@ async def read(websocket, path):
 # Start the server
 async def main():
     # IP address, check ip address by running ifconfig and update below accordingly.
-    async with serve(read, "192.168.0.181", 8765, ping_interval=None):
+    async with serve(read, "192.168.0.180", 8765, ping_interval=None):
         await asyncio.Future()
 
 asyncio.run(main())

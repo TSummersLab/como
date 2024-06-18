@@ -6,6 +6,7 @@ import subprocess
 import os
 import sys
 import time
+import getpass
 from websocket import create_connection
 
 # Generate or retrieve unique roslaunch identifier
@@ -15,17 +16,19 @@ roslaunch.configure_logging(uuid)
 # Retrieve unique namespace of the client
 NAMESPACE = rospy.get_namespace()
 NAMESPACE = NAMESPACE[1:-1] # removes slash at the end and beginning
+USER = getpass.getuser()
 
 # Class for starting and stopping ros program
 class ROSProgram:
-    def __init__(self, filename):
+    def __init__(self, packagename, filename):
         self.filename = filename
+        self.packagename = packagename
         self.launch = None
 
     # Function to start a ros program using roslaunch api
     def start(self):
     	# Absolute path used to run .launch files. Update path as needed
-        filepath = os.path.abspath('/home/nano3/como/workspace/src/como_driver/launch/' + self.filename + '.launch')
+        filepath = os.path.abspath('/home/' + USER + '/como/workspace/src/' + self.packagename + '/launch/' + self.filename + '.launch')
         self.launch = roslaunch.parent.ROSLaunchParent(uuid, [filepath], is_core=True)
         self.launch.start()
         print("ROS Program Started")
@@ -106,7 +109,7 @@ def handle_messages(websocket):
         command = message.split()[0]
 
         if command == 'init':
-            program = ROSProgram(message.split()[1])	# Initializes ros program
+            program = ROSProgram(message.split()[1], message.split()[2])	# Initializes ros program
         elif command == 'start':
             program.start()
         elif command == 'stop':
@@ -115,14 +118,13 @@ def handle_messages(websocket):
         	sys.exit()	# Disconnects client from server
         elif command == 'prog_cmd':
         	prog_cmd(message)	# Handles custom messages
-	elif command == 'rosservice':
-		call_rosservice(message)	# Handles calls to ros services
+        elif command == 'rosservice':
+        	call_rosservice(message)
         else:
-            # Handle unexpected messages
-            print("Unhandled message: {}".format(message))
+        	print("Unhandled message: {}".format(message))
 
 def run():
-    uri = "ws://192.168.0.181:8765" # IP address, check ip address by running ifconfig and update accordingly.
+    uri = "ws://192.168.0.180:8765" # IP address, check ip address by running ifconfig and update accordingly.
 
     websocket = create_connection(uri) # websocket cocnnection to server
     try:

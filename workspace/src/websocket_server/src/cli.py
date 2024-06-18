@@ -14,7 +14,7 @@ async def send_command(websocket, client_id, command, args):
 
 # Main function to run client
 async def run():
-    uri = "ws://192.168.0.181:8765" # IP address, check ip address by running ifconfig and change accordingly
+    uri = "ws://192.168.0.180:8765" # IP address, check ip address by running ifconfig and change accordingly
 
     async with connect(uri, ping_interval=None) as websocket:
         await login(websocket)
