@@ -4,7 +4,10 @@ from distutils.core import setup
 from catkin_pkg.python_setup import generate_distutils_setup
 
 setup_args = generate_distutils_setup(
-        packages=['virtual_track', 'virtual_track.como_tracks'],
+        packages=['virtual_track',
+                  'virtual_track.como_tracks',
+                  'tools',
+                  'vehicle_data'],
         package_dir={'': 'src'}
 )
 
