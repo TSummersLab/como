@@ -5,9 +5,9 @@ from math import sqrt
 import random
 
 class EstVelPub:
-    '''
-    Publish initial velocity estimates from Motive position data
-    '''
+    """
+    Publish initial velocity estimates from MotiveSub (Optitrack Motive) position data
+    """
 
     def __init__(self, namespace):
         self.est_vel_pub = rospy.Publisher(namespace + '/est_vel', Float64, queue_size=10)
@@ -15,29 +15,64 @@ class EstVelPub:
         self.pos_queue = Queue(maxsize=self.queue_size)
 
     def estimate_velocity(self, robot_pos, timestamp, cur_vel_est):
-        self.pos_queue.put([robot_pos, timestamp])
+        """Trigger the first velocity estimation filter upon reaching max capacity in the position queue"""
+        self.pos_queue.put([robot_pos, timestamp]) # Update the position queue with the most recent position data
         if self.pos_queue.full():
+            # If the position queue is full, generate a velocity estimate and update the queue
             self.shift_queue(2, 3, 0, cur_vel_est)
 
-    def calculate_vel(self, p1, p2, rate, prev_est):
+    @staticmethod
+    def calculate_vel(p1, p2, rate, prev_est):
+        """
+        Compute the absolute velocity
+        ------
+        :param p1: position (x, y) data of the first data point
+        :param p2: position (x, y) data of the second data point
+        :param rate: the rate at which the the vehicle is moving from p1 to p2
+        :param prev_est: the current velocity estimate
+        """
+
         del_x = p2[0] - p1[0]
         del_y = p2[1] - p1[1]
         dis = sqrt(del_x ** 2+ del_y ** 2)
         vel_est = dis * rate
+
+        # If the new estimated velocity exceeds the previous estimate by a given margin, overwrite it with the
+        # previous estimate. This serves to limit any velocity estimate outliers. This is acceptable due to the fast
+        # update rate and computation of this dual-layer filter.
         if abs(vel_est - prev_est) > 0.5:
             vel_est = prev_est
         return vel_est
 
-    def trim_outliers(self, vel_est, trim_count):
-        #TODO: Modify trim outliers to trim only min/max, based on statistical distribution of the set of estimated velocities
+    @staticmethod
+    def trim_outliers(vel_est, trim_count):
+        """
+        Trim the outliers from the set of velocity estimates
+        -------
+        :param vel_est: the list of velocity estimates (size is 1 less than that of the position queue)
+        :param trim_count: the number of outliers to trim (on both sides)
+        """
+
+        # todo: Modify trim outliers to appropriately trim velocities based on the statistical distribution of the set
+
         for i in range(trim_count):
-            vel_est.remove(max(vel_est))
-            vel_est.remove(min(vel_est))
+            vel_est.remove(max(vel_est)) # Remove the largest velocity estimate from the list
+            vel_est.remove(min(vel_est)) # Remove the smallest velocity estimate from the list
         return vel_est
 
     def shift_queue(self, shift_num, trim_count, rand_remove, prev_est):
-        # Compute estimated velocities from recent positions
-        points = list(self.pos_queue.queue)
+        """
+        Generate a set of initial velocity estimates and update/shift the position queue for new/incoming data
+        ------
+        :param shift_num: the number of entries by which to shift the queue upon trigger
+        :param trim_count: the number of velocity estimates to trim (on both sides)
+        :param rand_remove: the number of random velocities to remove at random
+        :param prev_est: the current velocity estimate
+        """
+
+        points = list(self.pos_queue.queue) # Reformat the queue as a list of data points
+
+        # Compute an initial set of velocity estimates between each consecutive pair of position points
         vel_est = []
         for i in range(self.queue_size - 1):
             del_time = (points[i + 1][1] - points[i][1])/(10.0 ** 9)
