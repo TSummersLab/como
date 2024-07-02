@@ -108,7 +108,7 @@ def main():
         lane = lane_switch.get_lane() # Gest integer that is used to choose a lane
         # Loads new lane from track if lane is changed
         if currentlane != lane:
-            x, y = load_figure8_two_centerline_track(file)
+            x, y = load_figure8_two_centerline_track(file, lane)
             currentlane = lane
 
         # Localization: Retrieve the current pose, orientation, and corresponding timestamp
