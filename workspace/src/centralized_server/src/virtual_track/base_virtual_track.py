@@ -30,7 +30,11 @@ from barc.msg import ECU, mod_ECU, Encoder
 from geometry_msgs.msg import Point, Twist, PoseStamped
 from std_msgs.msg import Float64, String
 
+# Service Imports
+#from centralized_server.srv import StartStop, StartStopResponse, LaneSwitch, LaneSwitchResponse, ChangeSpeed, ChangeSpeedResponse
+
 # Local ROS Package Imports
+from rosservices_script import *
 from como_tracks.oval_track_sim import *
 from como_tracks.load_track import *
 from post_processing import *
@@ -58,7 +62,6 @@ package_path = find_package_path('centralized_server')
 # Start threading event to ROS Shutdown procedure to ensure completion of data collection
 post_processing_done = threading.Event()
 
-
 def main():
     # Initialize ROS Nodes and Publishers
     rospy.init_node("virtual_track_controller")
@@ -70,10 +73,17 @@ def main():
     dt = 1.0/rateHz # Calculate operational frequency, for use with related models
     rate = Rate(rateHz)
 
+    # Initialize the rosservices
+    stop_srv = StartStopSrv()
+    lane_switch = LaneSwitchSrv()
+    speed_srv = ChangeSpeedSrv()
+
     # Mapping : Initialize environment with the desired virtual track data
     global x, y
-    file = os.path.join(package_path, 'scripts', 'virtual_track', 'como_tracks', 'tracks', 'figure8_two_centerline.csv')
-    x, y = load_figure8_two_centerline_track(file)
+    file = os.path.join(package_path, 'src', 'virtual_track', 'como_tracks', 'tracks', 'figure8_two_centerline.csv')
+    lane = lane_switch.get_lane()
+    currentlane = lane
+    x, y = load_figure8_two_centerline_track(file, lane)
 
     # Initialize lookahead and steering limits for planner and controller operations
     lookahead = 0.5
@@ -93,6 +103,13 @@ def main():
     # as current controller does not actively use motor gain.
 
     while not rospy.is_shutdown():
+        stop_flag = stop_srv.get_stop_flag() # Boolean that defines if motor speed is set to 0
+	speed_int = speed_srv.get_speed() # Gets float that is used to set motor speed
+        lane = lane_switch.get_lane() # Gest integer that is used to choose a lane
+        # Loads new lane from track if lane is changed
+        if currentlane != lane:
+            x, y = load_figure8_two_centerline_track(file)
+            currentlane = lane
 
         # Localization: Retrieve the current pose, orientation, and corresponding timestamp
         robot_pos, stamp = motive_sub.get_cur_pose()
@@ -130,7 +147,7 @@ def main():
         servo_to_goal = (theta - angle_to_goal)
 
         # Initialize components for controller commands
-        motor = 7.75
+        motor = speed_int
         servo_gain = 1
 
         # PID controller for steering (servo)
@@ -149,10 +166,18 @@ def main():
         servo_to_goal = np.clip(servo_to_goal, steer_min, steer_max)
         servo_to_goal += np.pi/2
 
-        control_inputs.append([motor, servo_to_goal, motor_gain, servo_gain])
+        # If stop_flag is true set throttle to 0 to stop the COMO, else continue with defined motor speed
+        if stop_flag:
+            control_inputs.append([0, servo_to_goal, 0, servo_gain])
+            ecu_cmd = mod_ECU(0, servo_to_goal, 0, servo_gain)
+        else:
+            control_inputs.append([motor, servo_to_goal, motor_gain, servo_gain])
+            ecu_cmd = mod_ECU(motor, servo_to_goal, motor_gain, servo_gain)
+
+        #control_inputs.append([motor, servo_to_goal, motor_gain, servo_gain])
 
         # Publish mod_ECU command to the low_level controller
-        ecu_cmd = mod_ECU(motor, servo_to_goal, motor_gain, servo_gain)
+        #ecu_cmd = mod_ECU(motor, servo_to_goal, motor_gain, servo_gain)
         nh.publish(ecu_cmd)
 
         # Pause the program loop to match the desired rate.
