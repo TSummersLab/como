@@ -29,7 +29,11 @@ def bound_servo_angle(servo_angle):
     return servo_angle
 
 x_track, y_track, heading_track, waypoint_x_track, waypoint_y_track, timestamp_track = [], [], [], [], [], []
+<<<<<<< HEAD
+package_path = find_package_path('test_launches')
+=======
 package_path = find_package_path('centralized_server')
+>>>>>>> 913442c51d13c42775e17a3ecdc5111454fe1793
 velocity_track = []
 motive_data = []
 waypoints = []
@@ -176,7 +180,7 @@ def main():
 
         #if abs(servo_to_goal) > 0.2:
         #    motor = 6.75
-				
+        
         vel_diff = desired_speed - cur_speed
 				#print(vel_diff)
 				#if vel_diff > 1.1:
@@ -192,7 +196,7 @@ def main():
         t1, t2, diff = find_operation_time(t1, t2)
         #print("Adjust steering gains", diff)
         #print(motor, servo_gain)
-        
+
         '''
         steering = 1524 + 250 * servo_to_goal
         if steering > 1824:
@@ -201,7 +205,7 @@ def main():
             steering = 1224
         print(throttle, steering)
         '''
-        
+
         servo_to_goal = np.clip(servo_to_goal, steer_min, steer_max)
         servo_to_goal += np.pi/2
         t1, t2, diff = find_operation_time(t1, t2)

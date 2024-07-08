@@ -1,8 +1,9 @@
-<!-- Sleiman Safaoui
-    July 30, 2018
+<!-- Kevin Daniel
+    October 12, 2018
   -->
+<!-- Updated February 10, 2023 - Sai Bommisetty -->
 
-<!-- Launch file to start the line follower and its corresponding higher-level controller -->
+<!-- Launch file for the Perot demo. Line follower + Collision avoidance using the LIDAR-->
 
 <launch>
 
@@ -21,25 +22,26 @@
 	<!-- LOW-LEVEL CONTROLLER -->
 	<node pkg="barc" type="controller_low_level.py" name="low_level_controller" output="screen" />
     
-    
-    
+    <!-- LIDAR -->
+    <include file="$(find controllers)/launch/rplidar_a3.launch" />
     
     <!-- intermediate level controller-->
-    
-	<!-- Start cam_bridge, img_preprocessing, and process_line -->
-	<include file="$(find image_processing)/launch/process_line.launch" />
+   
 
-	<!-- april tag detector -->
-	<node pkg="image_processing" type = "april_tag_detector.py" name = "april_tag_detector" output = "screen" respawn = "true">
-		<rosparam command="load" file="$(find image_processing)/config/april_tag_detector_params.yml"/>
-	</node>
-	
+	<!-- Start cam_bridge, img_preprocessing, and process_line -->
+        <include file="$(find image_processing)/launch/process_line.launch" />
+
 	<!-- INTERMEDIATE-LEVEL CONTROLLER (line_follower) -->
 	<node pkg="controllers" type="line_follower.py" name="line_follower" output="screen"/>
 	
-    <!-- higher level controller-->
-    
-	<node pkg="como_driver" type="platoon.py" name="platoon" output="screen" respawn = "true">
-		<rosparam command="load" file="$(find como_driver)/config/platoon_params.yml"/>
+	<!-- INTERMEDIATE-LEVEL CONTROLLER (lidar_collision_avoidance) -->
+	<node pkg="controllers" type="lidar_collision_avoidance.py" name="lidar_collision_avoidance" output="screen" respawn="true">
+		<rosparam command="load" file="$(find controllers)/config/lidar_collision_avoidance_params.yml"/>
 	</node>
+
+    <!-- higher level controller-->
+	<node pkg="como_driver" type="perot_demo.py" name="perot_demo" output="screen"/>
+	
+	
+        
 </launch>
