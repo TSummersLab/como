@@ -25,7 +25,7 @@
 	<arg name="plot" default="true" />
 
 	<!--oval track path following-->
-	<node pkg="centralized_server" type="spid_oval_track_test.py" name="oval_track_follower" output= "screen" >
+	<node pkg="centralized_server" type="base_virtual_track.py" name="virtual_track_controller" output= "screen" >
 		<param name="log" value="$(arg log)" />
 		<param name="plot" value="$(arg plot)" />
 	</node>

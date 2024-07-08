@@ -7,6 +7,3 @@
 [submodule "workspace/src/nmea_navsat_driver"]
 	path = workspace/src/nmea_navsat_driver
 	url = https://github.com/ros-drivers/nmea_navsat_driver.git
-[submodule "workspace/src/centralized_server/src/virtual_track/como_tracks"]
-	path = workspace/src/centralized_server/src/virtual_track/como_tracks
-	url = https://github.com/The-SS/como_tracks

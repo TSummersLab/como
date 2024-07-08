@@ -29,7 +29,11 @@ def bound_servo_angle(servo_angle):
     return servo_angle
 
 x_track, y_track, heading_track, waypoint_x_track, waypoint_y_track, timestamp_track = [], [], [], [], [], []
+<<<<<<< HEAD
 package_path = find_package_path('test_launches')
+=======
+package_path = find_package_path('centralized_server')
+>>>>>>> 913442c51d13c42775e17a3ecdc5111454fe1793
 velocity_track = []
 motive_data = []
 waypoints = []
@@ -64,7 +68,7 @@ def main():
     #file = os.path.join(package_path, 'scripts', 'virtual_track', 'como_tracks', 'tracks', 'otsl_track')
     #x, y = load_single_lane_oval_track(file)
     
-    file = os.path.join(package_path, 'scripts', 'virtual_track', 'como_tracks', 'tracks', 'figure8_two_centerline.csv')
+    file = os.path.join(package_path, 'src', 'virtual_track', 'como_tracks', 'tracks', 'figure8_two_centerline.csv')
     x, y = load_figure8_two_centerline_track(file)
 
     x0, y0 = x[0], y[0]
@@ -81,7 +85,7 @@ def main():
 
     #robot = SingleTrack(x=x0, y=y0, heading=theta0, v=v, lr=0.1, lf=0.1, dt=dt)
     
-    motive_sub = MotiveSub("COMO4")
+    motive_sub = MotiveSub("COMO1")
     est_vel_sub = EstVelSub()
     error_sub = ErrorSub()
     vel_est_sub = EncoderSub()
@@ -111,20 +115,20 @@ def main():
         t1, t2, diff = find_operation_time(t1, t2)
         #print("Optitrack Data", diff)
         pos_queue.put([robot_pos, stamp])
-				cur_estimate = est_vel_sub.avg_velocity_est()
-				if pos_queue.full():
+        cur_estimate = est_vel_sub.avg_velocity_est()
+        if pos_queue.full():
             shift_queue(pos_queue, est_vel, 2, 3, 0, cur_estimate)
-	   
+        
         t1, t2, diff = find_operation_time(t1, t2)
         
         publish_track_deviation(x, y, robot_pos, c_idx, track_deviation)
-				error_data.append(error_sub.get_lateral_deviation())
+        error_data.append(error_sub.get_lateral_deviation())
 				#print("Shift Queue", diff)
         #waypoints_ahead_x, waypoints_ahead_y, dist = get_waypoints_ahead_looped(x, y, robot_pos, lookahead)
         waypoints_ahead_x, waypoints_ahead_y, dist, close_idx = get_waypoints_heuristic(x, y, robot_pos, lookahead, c_idx)
         c_idx = close_idx
-				
-				wp = np.array([waypoints_ahead_x[-1], waypoints_ahead_y[-1]])
+        
+        wp = np.array([waypoints_ahead_x[-1], waypoints_ahead_y[-1]])
         t1, t2, diff = find_operation_time(t1, t2)
         #print("Find Waypoints", diff)
         x_track.append(robot_pos[0])
@@ -145,9 +149,9 @@ def main():
 				#print("Way", goal_x, goal_y)
         #print("Dis", inc_x, inc_y)
         heading_track.append(theta)
-				
-				motive_data.append([robot_pos[0], robot_pos[1], theta])
-				waypoints.append([wp[0], wp[1]])
+        
+        motive_data.append([robot_pos[0], robot_pos[1], theta])
+        waypoints.append([wp[0], wp[1]])
 
         angle_to_goal = atan2(inc_y, inc_x) - np.pi/2
         #print("Ang", theta, angle_to_goal)
@@ -163,21 +167,21 @@ def main():
         #throttle = 1630
         motor = 7.75
        	#motor = 7.25
-				servo_gain = 1
+        servo_gain = 1
         
         desired_speed = 1.8
         cur_speed = est_vel_sub.get_velocity()
         velocity_track.append(cur_speed)
-				encoder_velocity.append(vel_est_sub.get_estimated_velocity())
-				weighted_avg_velocity.append(encoder_velocity[-1]*0.9 + velocity_track[-1]*0.1)
+        encoder_velocity.append(vel_est_sub.get_estimated_velocity())
+        weighted_avg_velocity.append(encoder_velocity[-1]*0.9 + velocity_track[-1]*0.1)
 
         if abs(servo_to_goal) > 0.05: 
             servo_gain = (servo_to_goal/5.25 + 1)
 
         #if abs(servo_to_goal) > 0.2:
         #    motor = 6.75
-				
-				vel_diff = desired_speed - cur_speed
+        
+        vel_diff = desired_speed - cur_speed
 				#print(vel_diff)
 				#if vel_diff > 1.1:
 				#    motor_gain += vel_diff/60
@@ -192,8 +196,8 @@ def main():
         t1, t2, diff = find_operation_time(t1, t2)
         #print("Adjust steering gains", diff)
         #print(motor, servo_gain)
-        
-				'''
+
+        '''
         steering = 1524 + 250 * servo_to_goal
         if steering > 1824:
             steering = 1824
@@ -201,12 +205,12 @@ def main():
             steering = 1224
         print(throttle, steering)
         '''
-        
-				servo_to_goal = np.clip(servo_to_goal, steer_min, steer_max)
+
+        servo_to_goal = np.clip(servo_to_goal, steer_min, steer_max)
         servo_to_goal += np.pi/2
         t1, t2, diff = find_operation_time(t1, t2)
         #print("Reorient servo", diff)
-				control_inputs.append([motor, servo_to_goal, motor_gain, servo_gain])
+        control_inputs.append([motor, servo_to_goal, motor_gain, servo_gain])
         ecu_cmd = mod_ECU(motor, servo_to_goal, motor_gain, servo_gain)
         #ecu_cmd = ECU(throttle, steering)
         nh.publish(ecu_cmd)
@@ -236,8 +240,8 @@ def shutdown_handler():
 if __name__ == "__main__":
     try:
         rospy.on_shutdown(shutdown_handler)
-				main()
-				post_processing_done.wait()
-		except rospy.ROSInterruptException:
+        main()
+        post_processing_done.wait()
+    except rospy.ROSInterruptException:
         rospy.logfatal("ROS Interrupt. Shutting down speed_controller node")
         pass
